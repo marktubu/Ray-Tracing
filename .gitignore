@@ -1,0 +1,15 @@
+*.[oa]
+
+*.db
+
+*.VC.db
+
+
+*.VC.VC.opendb
+*.vcxproj
+
+
+/Debug
+/**/Debug
+/.vs
+/build
