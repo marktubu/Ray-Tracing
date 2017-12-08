@@ -6,6 +6,8 @@
 #include "hitable_list.h"
 #include "sphere.h"
 #include "camera.h"
+#include "lambertian.h"
+#include "metal.h"
 
 
 using namespace std;
@@ -13,6 +15,9 @@ using namespace std;
 
 vec3 center = vec3(0.0, 0.0, -1.0);
 float radius = 0.5;
+
+int MAX_REFLECTION_COUNT = 10;
+
 
 float hit_sphere(const vec3& center, float radius, const ray& r)
 {
@@ -33,13 +38,22 @@ float hit_sphere(const vec3& center, float radius, const ray& r)
 	}
 }
 
-vec3 color(ray& r, hitable_list* list)
+vec3 color(ray& r, hitable_list* list, int depth)
 {
 	hit_record rec;
-	if (list->hit(r, 0.0, numeric_limits<float>().max(), rec))
+	if (list->hit(r, 0.001, numeric_limits<float>::max(), rec))
 	{
-		vec3 N = unit_vector(rec.normal);
-		return 0.5*vec3(N.x() + 1, N.y() + 1, N.z() + 1);
+		r.count++;
+		ray scattered;
+		vec3 attenuation;
+		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+		{
+			return attenuation*color(scattered, list, depth + 1);
+		}
+		else 
+		{
+			return vec3(0, 0, 0);
+		}
 	}
 	
 	vec3 unit_direction = unit_vector(r.direction());
@@ -57,11 +71,17 @@ int main()
 	ofstream outfile("mytest.txt", ios_base::out);
 	outfile << "P3\n" << nx << " " << ny << "\n255\n";
 
-	hitable *list[2];
-	list[0] = new sphere(vec3(0.0, 0.0, -1.0), 0.5);
-	list[1] = new sphere(vec3(0.0, -100.5, -1.0), 100.0);
+	hitable *list[4];
+	//list[2] = new sphere(vec3(0.0, 0.5, -1.0), 0.25);
+	//list[0] = new sphere(vec3(0.0, 0.0, -1.0), 0.5, new lambertian(vec3(1,1,1)));
+	//list[1] = new sphere(vec3(0.0, -100.5, -1.0), 100.0, new metal(vec3(1, 1, 1)));
+	
+	list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
+	list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
+	list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2)));
+	list[3] = new sphere(vec3(-1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8)));
 
-	hitable_list* hit_list = new hitable_list(list, 2);
+	hitable_list* hit_list = new hitable_list(list, 4);
 
 
 	for (int j = ny - 1; j >= 0; j--)
@@ -78,7 +98,7 @@ int main()
 				ray r = cam.get_ray(u, v);
 				/*获得这个像素点区域随机采样点的颜色值。我们已经将颜色获得函数封装成一个叫做“camera”的类，后续会贴出这个类的代码*/
 
-				col += color(r, hit_list);
+				col += color(r, hit_list, 0);
 				/*将这个像素点区域的所有ns个随机采样点的颜色值累加*/
 			}
 			col /= float(ns);
