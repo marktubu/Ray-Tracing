@@ -3,6 +3,8 @@
 
 #include "vec3.h"
 
+#define M_PI 3.14
+
 class ray
 {
 public:

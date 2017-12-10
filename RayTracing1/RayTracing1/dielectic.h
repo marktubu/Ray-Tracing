@@ -2,7 +2,6 @@
 #define DIELECTIC_H
 
 #include "material.h"
-#include "metal.h"
 
 class dielectic : public material
 {
