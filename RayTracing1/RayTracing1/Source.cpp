@@ -63,7 +63,6 @@ vec3 color(ray& r, hitable_list* list, int depth)
 
 int main()
 {
-	camera cam;
 	int ns = 100;
 	int nx = 200;
 	int ny = 100;
@@ -82,6 +81,12 @@ int main()
 	list[3] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));  
 
 	hitable_list* hit_list = new hitable_list(list, 4);
+
+	vec3 lookfrom(3,3,2);  
+    vec3 lookat(0,0,-1);  
+    float dist_to_focus = (lookfrom - lookat).length();  
+    float aperture = 2.0;  
+    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus);
 
 
 	for (int j = ny - 1; j >= 0; j--)
