@@ -7,7 +7,7 @@
 
 *.VC.VC.opendb
 *.vcxproj
-
+*.filters
 
 /Debug
 /**/Debug
