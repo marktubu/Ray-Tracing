@@ -8,7 +8,7 @@
 #include "camera.h"
 #include "lambertian.h"
 #include "metal.h"
-
+#include "dielectic.h"
 
 using namespace std;
 
@@ -63,7 +63,6 @@ vec3 color(ray& r, hitable_list* list, int depth)
 
 int main()
 {
-	camera cam;
 	int ns = 100;
 	int nx = 200;
 	int ny = 100;
@@ -79,9 +78,15 @@ int main()
 	list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
 	list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
 	list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2)));
-	list[3] = new sphere(vec3(-1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8)));
+	list[3] = new sphere(vec3(-1,0,-1), 0.5, new dielectic(1.5));  
 
 	hitable_list* hit_list = new hitable_list(list, 4);
+
+	vec3 lookfrom(3,3,2);  
+    vec3 lookat(0,0,-1);  
+    float dist_to_focus = (lookfrom - lookat).length();  
+    float aperture = 2.0;  
+    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus);
 
 
 	for (int j = ny - 1; j >= 0; j--)
